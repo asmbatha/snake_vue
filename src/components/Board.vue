@@ -15,7 +15,7 @@ export default {
     data() {
         return {
             grid: [],
-            gridSize: 10,
+            gridSize: 15,
             blockSize: "20px",
             snake: [],
             mouth: null,
@@ -55,7 +55,7 @@ export default {
                     break;
             }
         });
-
+        alert('Use arrow buttons to play')
     },
     methods: {
         generateGrids: function() {

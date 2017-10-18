@@ -20,4 +20,14 @@ html, body {
     padding: 0;
     background: #CCC;
 }
+body {
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+}
+#app {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
 </style>
