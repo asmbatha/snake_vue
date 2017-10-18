@@ -21,6 +21,7 @@
     "vue": "vue/dist/vue.common.js"
   },
   "dependencies": {
+    "express": "^4.16.2",
     "vue": "^2.0.1"
   },
   "devDependencies": {
