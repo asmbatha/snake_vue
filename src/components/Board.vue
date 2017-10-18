@@ -1,13 +1,6 @@
 <template>
-    <div>
-        {{direction}}
-        <div id="board" :style="{
-                            'grid-template-columns': `repeat(${gridSize}, ${blockSize})`,
-                            'grid-template-rows': `repeat(${gridSize}, ${blockSize})`,
-                        }">
-            <block v-for="(block , i) in blocks" :key="i" :block-state="block.state"></block>
-        </div>
-        <button v-if="!timeout" @click="play">Play</button>
+    <div id="board" :style="{'grid-template-columns': `repeat(${gridSize}, ${blockSize})`,'grid-template-rows': `repeat(${gridSize}, ${blockSize})`}">
+        <block v-for="(block , i) in blocks" :key="i" :block-state="block.state"></block>
     </div>
 </template>
 
@@ -26,8 +19,9 @@ export default {
             blockSize: "20px",
             snake: [],
             mouth: null,
+            food: null,
             direction: "right",
-            nextDirection: [],
+            nextDirection: "right",
             speed: 150,
             timeout: false,
         }
@@ -44,18 +38,20 @@ export default {
             };
             var keycode = e.keyCode || e.which; // also for cross-browser compatible
 
+            if(!this.timeout) this.play();
+
             switch (keycode) {
                 case Key.LEFT:
-                    if (this.direction != 'right') this.nextDirection.push("left");
+                    if (this.direction != 'right') this.nextDirection = "left";
                     break;
                 case Key.UP:
-                    if (this.direction != 'down') this.nextDirection.push("up");
+                    if (this.direction != 'down') this.nextDirection = "up";
                     break;
                 case Key.RIGHT:
-                    if (this.direction != 'left') this.nextDirection.push("right");
+                    if (this.direction != 'left') this.nextDirection = "right";
                     break;
                 case Key.DOWN:
-                    if (this.direction != 'up') this.nextDirection.push("down");
+                    if (this.direction != 'up') this.nextDirection = "down";
                     break;
             }
         });
@@ -73,24 +69,27 @@ export default {
                 i = Math.floor(Math.random() * this.grid.length)
                 if (this.grid[i].state == 'none') free = !free;
             }
-
+            this.food = i;
             this.blockState(i, 'food')
         },
         blockState(block, state) {
-            this.grid[block].state = state
+            if(block != null){
+                this.grid[block].state = state
+            }
         },
         init() {
-            this.snake.map(i => this.grid[i].state = 'none')
-            
+            this.snake.map( i => this.blockState(i, 'none'))
+
             let i = Math.floor(this.grid.length / 2)
             this.snake = [i]
             this.mouth = i
             this.blockState(i, 'snake')
 
+            this.blockState(this.food, 'none')
             this.setFood()
 
             this.direction = "right"
-            this.nextDirection = []
+            this.nextDirection = "right"
         },
         play() {
             this.init();
@@ -99,9 +98,12 @@ export default {
         stop() {
             clearInterval(this.timeout)
             this.timeout = false;
+            alert('Game Over')
         },
         processFrame() {
             let n = this.nextBlock()
+
+            if (this.grid.length == (this.snake.length + 1)) this.stop();
 
             if (this.grid[n].state != 'food') this.blockState(this.snake.shift(), 'none')
             else this.setFood()
@@ -112,11 +114,12 @@ export default {
             this.mouth = n
             this.blockState(n, 'snake')
 
-            let busy = true;
-            while (this.nextDirection.length || busy) {
-                let nd = this.nextDirection.shift()
-                if(this.validDirection(nd)) this.direction = nd
-            }
+            this.direction = this.nextDirection
+            // let busy = true;
+            // while (this.nextDirection.length || busy) {
+            //     let nd = this.nextDirection.shift()
+            //     if(this.validDirection(nd)) this.direction = nd
+            // }
         },
         validDirection(dir) {
             let match = {
